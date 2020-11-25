@@ -40,6 +40,9 @@ import {
   SHOP_DETAILS_QUERY,
   PAGES_QUERY
 } from "./queries"
+import {
+  GATSBYSTOREFRONT_PRODUCTS_QUERY,
+} from "./queries-gatsbystorefront"
 
 export const sourceNodes = async (
   {
@@ -53,6 +56,7 @@ export const sourceNodes = async (
   {
     shopName,
     accessToken,
+    useGatsbyStorefrontApi = false,
     apiVersion = `2020-07`,
     verbose = true,
     paginationSize = 250,
@@ -66,7 +70,7 @@ export const sourceNodes = async (
     articles: ARTICLES_QUERY,
     blogs: BLOGS_QUERY,
     collections: COLLECTIONS_QUERY,
-    products: PRODUCTS_QUERY,
+    products: useGatsbyStorefrontApi ? GATSBYSTOREFRONT_PRODUCTS_QUERY : PRODUCTS_QUERY,
     shopPolicies: SHOP_POLICIES_QUERY,
     shopDetails: SHOP_DETAILS_QUERY,
     pages: PAGES_QUERY

@@ -224,43 +224,7 @@ export const PRODUCTS_QUERY = `
               }
             }
           }
-          vendor
-          cmsConnection {
-            productId
-            shortDescription
-            description
-            descriptionHtml
-            descriptionSections {
-              title
-              content
-              contentHtml
-              isOpen
-              orderPriority
-            }
-          } 
-          reviewsConnection {
-            pageInfo {
-              hasNextPage
-            }
-            edges {
-              cursor
-              node {
-                id
-                title
-                content
-                score
-                votesUp
-                votesDown
-                createdAt
-                updatedAt
-                sentiment
-                productId
-                name
-                email
-                source
-              }
-            }
-          }
+          vendor          
         }
       }
     }
