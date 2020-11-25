@@ -225,6 +225,19 @@ export const PRODUCTS_QUERY = `
             }
           }
           vendor
+          cmsConnection {
+            productId
+            shortDescription
+            description
+            descriptionHtml
+            descriptionSections {
+              title
+              content
+              contentHtml
+              isOpen
+              orderPriority
+            }
+          } 
           reviewsConnection {
             pageInfo {
               hasNextPage
