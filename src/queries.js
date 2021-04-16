@@ -224,7 +224,7 @@ export const PRODUCTS_QUERY = `
               }
             }
           }
-          vendor          
+          vendor
         }
       }
     }

@@ -16,25 +16,35 @@ import {
   PRODUCT_REVIEWS_CONNECTION,
   SHOP_POLICY,
   SHOP_DETAILS,
-  PAGE
+  PAGE,
 } from "./constants"
 
 const { createNodeFactory, generateNodeId } = createNodeHelpers({
-  typePrefix: TYPE_PREFIX
+  typePrefix: TYPE_PREFIX,
 })
 
 const downloadImageAndCreateFileNode = async (
   { url, nodeId },
-  { createNode, createNodeId, touchNode, store, cache, getCache, reporter }
+  {
+    createNode,
+    createNodeId,
+    touchNode,
+    store,
+    cache,
+    getCache,
+    getNode,
+    reporter,
+    downloadImages,
+  }
 ) => {
-  let fileNodeID
+  if (!downloadImages) return undefined
 
   const mediaDataCacheKey = `${TYPE_PREFIX}__Media__${url}`
   const cacheMediaData = await cache.get(mediaDataCacheKey)
 
   if (cacheMediaData) {
-    fileNodeID = cacheMediaData.fileNodeID
-    touchNode({ nodeId: fileNodeID })
+    const fileNodeID = cacheMediaData.fileNodeID
+    touchNode(getNode(fileNodeID))
     return fileNodeID
   }
 
@@ -46,11 +56,11 @@ const downloadImageAndCreateFileNode = async (
     createNodeId,
     getCache,
     parentNodeId: nodeId,
-    reporter
+    reporter,
   })
 
   if (fileNode) {
-    fileNodeID = fileNode.id
+    const fileNodeID = fileNode.id
     await cache.set(mediaDataCacheKey, { fileNodeID })
     return fileNodeID
   }
@@ -90,8 +100,8 @@ export const CollectionNode = imageArgs =>
       node.image.localFile___NODE = await downloadImageAndCreateFileNode(
         {
           id: node.image.id,
-          url: node.image.src && node.image.src.split(`?`)[0],
-          nodeId: node.id
+          url: node.image.src,
+          nodeId: node.id,
         },
         imageArgs
       )
@@ -144,7 +154,7 @@ export const ProductNode = imageArgs =>
         edge.node.localFile___NODE = await downloadImageAndCreateFileNode(
           {
             id: edge.node.id,
-            url: edge.node.originalSrc && edge.node.originalSrc.split(`?`)[0]
+            url: edge.node.originalSrc,
           },
           imageArgs
         )
@@ -174,10 +184,14 @@ export const ProductVariantNode = (imageArgs, productNode) =>
       node.image.localFile___NODE = await downloadImageAndCreateFileNode(
         {
           id: node.image.id,
-          url: node.image.originalSrc && node.image.originalSrc.split(`?`)[0]
+          url: node.image.originalSrc,
         },
         imageArgs
       )
+
+    if (!isNaN(node.price)) {
+      node.priceNumber = parseFloat(node.price)
+    }
 
     node.product___NODE = productNode.id
     return node

@@ -17,7 +17,7 @@ import {
   ProductReviewsConnectionNode,
   ShopPolicyNode,
   ShopDetailsNode,
-  PageNode
+  PageNode,
 } from "./nodes"
 import {
   SHOP,
@@ -29,7 +29,7 @@ import {
   PRODUCT,
   SHOP_POLICY,
   SHOP_DETAILS,
-  PAGE
+  PAGE,
 } from "./constants"
 import {
   ARTICLES_QUERY,
@@ -38,11 +38,9 @@ import {
   PRODUCTS_QUERY,
   SHOP_POLICIES_QUERY,
   SHOP_DETAILS_QUERY,
-  PAGES_QUERY
+  PAGES_QUERY,
 } from "./queries"
-import {
-  GATSBYSTOREFRONT_PRODUCTS_QUERY,
-} from "./queries-gatsbystorefront"
+import { GATSBYSTOREFRONT_PRODUCTS_QUERY } from "./queries-gatsbystorefront"
 
 export const sourceNodes = async (
   {
@@ -51,7 +49,8 @@ export const sourceNodes = async (
     store,
     cache,
     getCache,
-    reporter
+    reporter,
+    getNode,
   },
   {
     shopName,
@@ -61,7 +60,8 @@ export const sourceNodes = async (
     verbose = true,
     paginationSize = 250,
     includeCollections = [SHOP, CONTENT],
-    shopifyQueries = {}
+    downloadImages = true,
+    shopifyQueries = {},
   }
 ) => {
   const client = createClient(shopName, accessToken, apiVersion)
@@ -70,10 +70,12 @@ export const sourceNodes = async (
     articles: ARTICLES_QUERY,
     blogs: BLOGS_QUERY,
     collections: COLLECTIONS_QUERY,
-    products: useGatsbyStorefrontApi ? GATSBYSTOREFRONT_PRODUCTS_QUERY : PRODUCTS_QUERY,
+    products: useGatsbyStorefrontApi
+      ? GATSBYSTOREFRONT_PRODUCTS_QUERY
+      : PRODUCTS_QUERY,
     shopPolicies: SHOP_POLICIES_QUERY,
     shopDetails: SHOP_DETAILS_QUERY,
-    pages: PAGES_QUERY
+    pages: PAGES_QUERY,
   }
 
   const queries = { ...defaultQueries, ...shopifyQueries }
@@ -93,7 +95,9 @@ export const sourceNodes = async (
       store,
       cache,
       getCache,
-      reporter
+      getNode,
+      reporter,
+      downloadImages,
     }
 
     // Arguments used for node creation.
@@ -105,7 +109,7 @@ export const sourceNodes = async (
       verbose,
       imageArgs,
       paginationSize,
-      queries
+      queries,
     }
 
     // Message printed when fetching is complete.
@@ -154,7 +158,7 @@ export const sourceNodes = async (
           }
         ),
         createShopPolicies(args),
-        createShopDetails(args)
+        createShopDetails(args),
       ])
     }
     if (includeCollections.includes(CONTENT)) {
@@ -166,7 +170,7 @@ export const sourceNodes = async (
               createNode(await CommentNode(imageArgs)(edge.node))
             )
         }),
-        createPageNodes(PAGE, queries.pages, PageNode, args)
+        createPageNodes(PAGE, queries.pages, PageNode, args),
       ])
     }
 
@@ -221,7 +225,7 @@ const createShopDetails = async ({
   createNode,
   formatMsg,
   verbose,
-  queries
+  queries,
 }) => {
   // // Message printed when fetching is complete.
   const msg = formatMsg(`fetched and processed ${SHOP_DETAILS} nodes`)
@@ -240,7 +244,7 @@ const createShopPolicies = async ({
   createNode,
   formatMsg,
   verbose,
-  queries
+  queries,
 }) => {
   // Message printed when fetching is complete.
   const msg = formatMsg(`fetched and processed ${SHOP_POLICY} nodes`)
@@ -250,10 +254,7 @@ const createShopPolicies = async ({
   Object.entries(policies)
     .filter(([_, policy]) => Boolean(policy))
     .forEach(
-      pipe(
-        ([type, policy]) => ShopPolicyNode(policy, { type }),
-        createNode
-      )
+      pipe(([type, policy]) => ShopPolicyNode(policy, { type }), createNode)
     )
   if (verbose) console.timeEnd(msg)
 }
